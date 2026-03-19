@@ -6,21 +6,20 @@ def cache(func: Callable) -> Callable:
     result = {}
 
     @wraps(func)
-    def inner(*args: Callable, **kwargs: Callable) -> Any:
+    def inner(*args: Any, **kwargs: Any) -> Any:
+        key = args
+        if kwargs:
+            key = args + tuple(sorted(kwargs.items()))
 
         try:
-            key = args
-            if kwargs:
-                key = args + tuple(sorted(kwargs.items()))
+            if key in result:
+                print("Getting from cache")
+                return result[key]
+            else:
+                print("Calculating new result")
+                result[key] = func(*args, **kwargs)
+                return result[key]
         except TypeError:
             raise TypeError("Arguments must be hashable")
-
-        if key in result:
-            print("Getting from cache")
-            return result[key]
-        else:
-            print("Calculating new result")
-            result[key] = func(*args, **kwargs)
-            return result[key]
 
     return inner
